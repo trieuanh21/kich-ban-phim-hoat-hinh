@@ -142,9 +142,23 @@ Trước khi xuất, hãy tự xác định: (a) mô tả nhân vật theo ảnh
  return out;
 }
 $("generateBtn").addEventListener("click",()=>{
- generatedPrompt=buildPrompt();$("output").textContent=generatedPrompt;
- $("copyBtn").disabled=false;$("downloadBtn").disabled=false;
- $("status").textContent=imageFile?"Prompt đã tạo · "+imageFile.name:"Prompt đã tạo · chưa chọn ảnh";
+ try {
+  generatedPrompt=buildPrompt();
+  $("output").textContent=generatedPrompt;
+  $("copyBtn").disabled=false;
+  $("downloadBtn").disabled=false;
+  $("status").textContent=imageFile?"Đã tạo prompt · "+imageFile.name:"Đã tạo prompt · chưa chọn ảnh";
+  showToast("Đã tạo prompt! Cuộn xuống xem kết quả.");
+  // On narrow/mobile screens the output panel is below the input panel.
+  if (window.matchMedia("(max-width: 760px)").matches) {
+   window.setTimeout(()=>$("output").scrollIntoView({behavior:"smooth",block:"start"}),120);
+  }
+ } catch (err) {
+  console.error("Prompt generation failed:",err);
+  $("status").textContent="Có lỗi khi tạo prompt";
+  showToast("Có lỗi khi tạo prompt. Hãy tải lại trang.");
+  alert("Không tạo được prompt. Thím tải lại trang rồi thử lại nha.");
+ }
 });
 $("copyBtn").addEventListener("click",async()=>{
  if(!generatedPrompt)return;
