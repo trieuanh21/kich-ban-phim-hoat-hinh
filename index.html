@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101116">
+<title>AI Short Film Prompt Generator</title>
+<style>
+:root{color-scheme:dark;--bg:#101116;--panel:#191b23;--panel2:#20232d;--line:#343846;--text:#f4f5f7;--muted:#a9afbd;--accent:#b8f36b;--accent2:#d7ff9f;--danger:#ffb4a9}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#252b2c 0,transparent 36%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{width:min(1100px,calc(100% - 28px));margin:30px auto 60px}
+header{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:22px}
+.brand{display:flex;gap:12px;align-items:center}.logo{width:44px;height:44px;border-radius:14px;background:var(--accent);color:#14170f;display:grid;place-items:center;font-size:23px;font-weight:900}
+h1{font-size:clamp(23px,4vw,34px);line-height:1.12;margin:0;letter-spacing:-.7px}header p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.tag{border:1px solid var(--line);border-radius:999px;padding:7px 11px;color:var(--accent2);font-size:12px;white-space:nowrap}
+.grid{display:grid;grid-template-columns: minmax(280px,.82fr) minmax(0,1.18fr);gap:18px;align-items:start}
+.panel{background:rgba(25,27,35,.94);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 12px 40px #0002}
+.panel h2{font-size:17px;margin:0 0 5px}.sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+.upload{border:1.5px dashed #555c6b;border-radius:16px;min-height:240px;display:grid;place-items:center;overflow:hidden;position:relative;background:#12141a;text-align:center;padding:16px;cursor:pointer}
+.upload:hover{border-color:var(--accent)}.upload img{max-width:100%;max-height:360px;object-fit:contain;border-radius:10px}.upload .empty{padding:18px}.upload .big{font-size:37px;display:block;margin-bottom:8px}.upload strong{display:block}.upload small{display:block;color:var(--muted);margin-top:6px}
+input[type=file]{display:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 14px;border-radius:11px;font-weight:700;cursor:pointer;font:inherit;font-size:13px}.btn:hover{filter:brightness(1.12)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#16190f}.btn:disabled{opacity:.45;cursor:not-allowed}
+details{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}summary{cursor:pointer;font-weight:700;font-size:14px}label{display:block;color:var(--muted);font-size:12px;margin:14px 0 6px}
+textarea,select,input[type=text]{width:100%;border:1px solid var(--line);background:#11131a;color:var(--text);border-radius:10px;padding:11px 12px;font:inherit;font-size:13px;outline:none}textarea:focus,select:focus,input:focus{border-color:var(--accent)}textarea{min-height:78px;resize:vertical}
+.fixed{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:15px 0}.chip{background:#11141a;border:1px solid #2d323e;border-radius:10px;padding:10px;font-size:12px;color:#d8dce4}.chip b{display:block;color:var(--accent2);font-size:11px;letter-spacing:.3px;margin-bottom:3px}
+.outputHead{display:flex;justify-content:space-between;gap:12px;align-items:center}.status{font-size:12px;color:var(--muted)}#output{min-height:500px;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;background:#11131a;border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:13px}
+.notice{color:var(--muted);font-size:12px;margin:12px 2px 0}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#16190f;padding:10px 16px;border-radius:999px;font-weight:800;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1}
+footer{text-align:center;color:#777e8d;font-size:12px;margin-top:22px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.panel{padding:16px}header{align-items:flex-start}.tag{display:none}#output{min-height:400px}.upload{min-height:190px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div class="brand"><div class="logo">▶</div><div><h1>AI Short Film<br>Prompt Generator</h1><p>Đưa ảnh vào · Tạo prompt phim 60 giây · Copy sang Muse</p></div></div>
+ <div class="tag">NO API KEY · GITHUB PAGES</div>
+</header>
+<div class="grid">
+<section class="panel">
+ <h2>01 / Ảnh tham chiếu</h2>
+ <p class="sub">Chỉ cần tải ảnh nhân vật lên. Các phần còn lại app tự điền mặc định.</p>
+ <label class="upload" id="dropArea" for="imageInput">
+  <div class="empty" id="emptyState"><span class="big">＋</span><strong>Chọn ảnh nhân vật</strong><small>JPG, PNG, WEBP · Ảnh chỉ xem trước trong trình duyệt</small></div>
+  <img id="preview" alt="Ảnh tham chiếu" hidden>
+ </label>
+ <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp">
+ <div class="row"><button class="btn" id="chooseBtn">📷 Chọn ảnh</button><button class="btn" id="removeBtn" disabled>✕ Bỏ ảnh</button></div>
+ <div class="fixed">
+  <div class="chip"><b>THỜI LƯỢNG</b>60 giây</div><div class="chip"><b>CẤU TRÚC</b>6 clip × 10 giây</div>
+  <div class="chip"><b>NGÔN NGỮ</b>Tiếng Việt</div><div class="chip"><b>GIỌNG</b>Miền Nam tự nhiên</div>
+  <div class="chip"><b>CONTINUITY</b>Khóa nhân vật & ánh sáng</div><div class="chip"><b>ĐẦU RA</b>6 prompt riêng biệt</div>
+ </div>
+ <details open>
+  <summary>✍️ Chỉnh sửa câu chuyện & lời thoại</summary>
+  <p class="sub" style="margin-top:8px">Thím có thể tự viết hoặc sửa trực tiếp hai phần này trước khi tạo prompt. Để trống phần nào thì Muse tự phát triển phần đó.</p>
+  <label for="story">CÂU CHUYỆN / Ý TƯỞNG</label>
+  <textarea id="story" rows="5" placeholder="Ví dụ: Cô bé đi vào rừng tìm bà ngoại, nhưng phát hiện con sói đang cần giúp đỡ...">Tự phát triển một câu chuyện ngắn thú vị, dễ hiểu và có kết thúc rõ ràng, dựa trên nhân vật trong ảnh.</textarea>
+  <label for="dialogue">LỜI THOẠI — Thím sửa nguyên văn tại đây</label>
+  <textarea id="dialogue" rows="6" placeholder="Ví dụ:\nCô bé: Chú sói ơi, sao chú đứng đây vậy?\nSói: Tui đang tìm đường về nhà nè!\n\nCó thể ghi rõ ai nói câu nào. Muse sẽ phát triển hoặc giữ lời thoại theo chỉ dẫn.">Tự viết lời thoại tự nhiên, đối đáp thường xuyên, phù hợp tính cách và tình huống.</textarea>
+  <label for="style">Phong cách hình ảnh</label>
+  <select id="style"><option value="Giữ phong cách hình ảnh, chất liệu, màu sắc và mức độ hiện thực theo ảnh tham chiếu.">Giữ phong cách theo ảnh</option><option value="Phim điện ảnh chân thực, cinematic, chuyển động tự nhiên, ánh sáng có chủ đích.">Điện ảnh chân thực</option><option value="Hoạt hình stop-motion thủ công, chất liệu rõ, chuyển động có nhịp và giàu biểu cảm.">Hoạt hình stop-motion</option><option value="Hoạt hình 3D phong cách truyện cổ tích, màu sắc ấm áp, biểu cảm dễ đọc.">Hoạt hình 3D cổ tích</option></select>
+  <label for="ending">Kiểu kết thúc</label>
+  <select id="ending"><option>Ấm áp, vui vẻ và có điểm kết rõ ràng.</option><option>Hài hước, có cú twist dễ hiểu.</option><option>Cảm động nhưng không bi lụy.</option><option>Bí ẩn, gợi tò mò.</option><option>Để AI tự chọn kết thúc phù hợp nhất.</option></select>
+  <label for="ratio">Tỷ lệ khung hình</label>
+  <select id="ratio"><option>16:9 ngang</option><option>9:16 dọc</option><option>1:1 vuông</option></select>
+ </details>
+ <div class="row"><button class="btn primary" id="generateBtn">✨ Tạo prompt hoàn chỉnh</button></div>
+ <p class="notice">Lưu ý: app tạo chỉ dẫn prompt, không tự gọi Muse hay tạo video. Khi chạy Muse, hãy đính kèm ảnh tham chiếu cùng prompt.</p>
+</section>
+<section class="panel">
+ <div class="outputHead"><div><h2>02 / Prompt sẵn sàng dùng</h2><p class="sub" style="margin:5px 0 0">Một master prompt + 6 clip có khóa continuity giống nhau.</p></div><span class="status" id="status">Chưa tạo</span></div>
+ <div id="output" aria-live="polite">Bấm “Tạo prompt hoàn chỉnh”. App sẽ tạo prompt tiếng Việt, yêu cầu Muse phân tích ảnh đính kèm và xây dựng phim 60 giây thành 6 clip liên tiếp.</div>
+ <div class="row"><button class="btn primary" id="copyBtn" disabled>⧉ Sao chép prompt</button><button class="btn" id="downloadBtn" disabled>↓ Tải .txt</button></div>
+</section>
+</div>
+<footer>AI Short Film Prompt Generator · Chạy hoàn toàn trên trình duyệt · Có thể host miễn phí bằng GitHub Pages</footer>
+</div>
+<div class="toast" id="toast">Đã sao chép!</div>
+<script>
+const $ = id => document.getElementById(id);
+let imageFile = null, generatedPrompt = "";
+const input = $("imageInput"), preview = $("preview"), empty = $("emptyState");
+function setImage(file){
+ if(!file) return;
+ if(!/^image\/(png|jpeg|webp)$/.test(file.type)){alert("Thím chọn ảnh PNG, JPG hoặc WEBP nha.");return;}
+ imageFile=file;
+ const url=URL.createObjectURL(file); preview.src=url; preview.hidden=false; empty.hidden=true;
+ $("removeBtn").disabled=false;
+ $("status").textContent="Đã nhận ảnh: "+file.name;
+}
+input.addEventListener("change",e=>setImage(e.target.files[0]));
+$("chooseBtn").addEventListener("click",()=>input.click());
+$("removeBtn").addEventListener("click",()=>{imageFile=null;input.value="";preview.hidden=true;preview.removeAttribute("src");empty.hidden=false;$("removeBtn").disabled=true;$("status").textContent="Đã bỏ ảnh";});
+const drop=$("dropArea");
+drop.addEventListener("dragover",e=>{e.preventDefault();drop.style.borderColor="var(--accent)";});
+drop.addEventListener("dragleave",()=>drop.style.borderColor="");
+drop.addEventListener("drop",e=>{e.preventDefault();drop.style.borderColor="";setImage(e.dataTransfer.files[0]);});
+function buildPrompt(){
+ const story=$("story").value.trim()||"Tự phát triển câu chuyện phù hợp nhất dựa trên ảnh tham chiếu.";
+ const dialogue=$("dialogue").value.trim()||"Tự viết lời thoại tự nhiên, thường xuyên và đúng tính cách nhân vật.";
+ const style=$("style").value, ending=$("ending").value, ratio=$("ratio").value;
+ const lock = `GLOBAL CONTINUITY LOCK — PHẢI GIỮ NGUYÊN TRONG CẢ 6 CLIP
+1. CHARACTER LOCK: Phân tích ảnh tham chiếu được đính kèm. Giữ đúng số lượng nhân vật, khuôn mặt, tuổi biểu kiến, vóc dáng, tóc, màu da, trang phục, phụ kiện, chất liệu, màu sắc và đạo cụ. Không tự đổi thiết kế, không thêm nhân vật quan trọng mới nếu câu chuyện không cần. Ảnh là nguồn tham chiếu hình ảnh chính.
+2. VISUAL STYLE LOCK: ${style} Không tự đổi phong cách giữa các clip.
+3. LIGHT & COLOR LOCK: Toàn bộ 6 clip diễn ra trong cùng bối cảnh và cùng thời điểm liên tục, trừ khi câu chuyện bắt buộc khác. Khóa hướng sáng, độ mềm/cứng, cường độ tương đối, nhiệt độ màu, exposure, white balance, contrast, saturation, màu nền và color grade. Không tự chuyển ngày sang đêm, không đổi ánh sáng hoặc màu phim giữa clip.
+4. VOICE LOCK: Tất cả lời thoại bằng tiếng Việt, giọng miền Nam Việt Nam tự nhiên, ưu tiên giọng Sài Gòn/TP.HCM. Không dùng giọng miền Bắc, miền Trung hoặc giọng thuyết minh chuẩn hóa. Mỗi nhân vật giữ cùng chất giọng, cách phát âm, cao độ tương đối, tốc độ và nhịp nói xuyên suốt cả 6 clip. Không nhại giọng địa phương. Nếu có tùy chọn voice/accent, chọn Southern Vietnamese.
+5. DIALOGUE & LIP SYNC: Lời thoại rõ, đầy đủ, đúng nhân vật; khẩu hình khớp tiếng Việt. Đối thoại qua lại tự nhiên và thường xuyên; không để nhân vật nói một câu rồi đứng im chờ hết clip. Chỉ giữ khoảng lặng khi có mục đích cảm xúc hoặc câu chuyện. Không chèn lời thoại ngoài kịch bản, không để hai người nói đè nhau trừ khi có chủ ý.
+6. SCREEN DIRECTION & PROPS: Giữ trục không gian, hướng nhìn, vị trí tương đối, tay đang cầm gì và trạng thái đạo cụ. Hành động cuối clip trước phải nối hợp lý với đầu clip sau.
+7. CAMERA: Chọn góc máy và chuyển động đơn giản, có chủ đích, phù hợp hành động. Không đổi góc, lens hoặc chuyển động vô cớ giữa một clip. Chuyển động nhân vật tự nhiên, không biến dạng cơ thể/đạo cụ.
+8. AUDIO: Giữ ambience nhất quán; thoại ở mức rõ ràng; không tự thêm nhạc có lời. Tránh tiếng nền đột ngột đổi giữa clip. Nếu có âm thanh đồng bộ với hành động, đặt đúng thời điểm.
+9. OUTPUT: Tạo 6 clip RIÊNG BIỆT, mỗi clip đúng 10 giây, tổng cộng 60 giây. Mỗi clip phải tự chứa các khóa cần thiết ở trên để có thể dùng độc lập. Không tóm tắt thay cho prompt quay video. Không bỏ trống phần hành động/thoại chỉ để kéo đủ 10 giây.
+10. LIMITATION: Không khẳng định continuity tuyệt đối nếu công cụ không hỗ trợ. Ưu tiên dùng ảnh tham chiếu nhân vật cho mọi clip; nếu công cụ cho phép, dùng frame cuối clip trước làm ảnh đầu vào clip kế tiếp.`;
+ const clips = [
+  ["CLIP 1 / 00:00–00:10 — THIẾT LẬP","Giới thiệu bối cảnh và nhân vật bằng hành động có ý nghĩa ngay từ đầu. Mở câu chuyện rõ ràng, không kéo dài establishing shot vô ích. Kết thúc bằng một hành động hoặc thông tin tạo đà trực tiếp cho clip 2."],
+  ["CLIP 2 / 00:10–00:20 — KHỞI ĐỘNG","Tiếp nối chính xác tư thế, vị trí, ánh mắt, đạo cụ và trạng thái từ frame cuối clip 1. Phát triển mục tiêu hoặc tình huống; thoại qua lại tự nhiên."],
+  ["CLIP 3 / 00:20–00:30 — PHÁT TRIỂN","Tiếp nối hành động clip 2, tăng thông tin hoặc rắc rối. Duy trì nhịp thoại và phản ứng nhân vật; kết thúc bằng một thay đổi rõ ràng."],
+  ["CLIP 4 / 00:30–00:40 — BIẾN CHUYỂN","Tiếp tục cùng không gian và ánh sáng. Đưa câu chuyện tới bước ngoặt hoặc tình huống thú vị hơn, nhưng vẫn dễ hiểu và có thể tạo video."],
+  ["CLIP 5 / 00:40–00:50 — CAO TRÀO","Đẩy tình huống tới điểm căng thẳng, hài hước hoặc cảm xúc phù hợp câu chuyện. Hành động và thoại cụ thể, không lặp lại thông tin đã biết."],
+  ["CLIP 6 / 00:50–01:00 — KẾT THÚC","Giải quyết câu chuyện và tạo kết thúc rõ ràng. Kết thúc: "+ending+" Dành vài giây cuối cho hình ảnh kết có chủ đích, không đứng im quá lâu."]
+ ];
+ let out=`AI SHORT FILM GENERATOR — MASTER PROMPT
+MỤC TIÊU: Tạo phim ngắn 60 giây từ ảnh tham chiếu đính kèm.
+TỶ LỆ KHUNG HÌNH: ${ratio}
+ĐẦU VÀO: Ảnh tham chiếu nhân vật được đính kèm trong cùng yêu cầu. Hãy nhìn và phân tích ảnh trực tiếp; không giả định nội dung ảnh nếu không nhìn thấy ảnh.
+
+STORY ENGINE
+Ý TƯỞNG: ${story}
+THOẠI / CHỈ DẪN THOẠI DO NGƯỜI DÙNG NHẬP: ${dialogue}
+Nếu phần này chứa lời thoại cụ thể, giữ nguyên ý nghĩa và câu chữ của người dùng; chỉ chỉnh nhẹ để nói tự nhiên nếu cần. Nếu phần này là chỉ dẫn chung hoặc để trống, tự viết lời thoại mới. KẾT THÚC MONG MUỐN: ${ending}
+Dựa sát vào phần CÂU CHUYỆN / Ý TƯỞNG do người dùng nhập. Nếu người dùng đã viết cốt truyện cụ thể, không tự ý thay đổi nhân vật, sự kiện chính hoặc kết thúc. Hãy tự bổ sung chi tiết còn thiếu để câu chuyện có mở đầu, phát triển, bước ngoặt và kết thúc; ưu tiên một bối cảnh, ít nhân vật, ít đạo cụ và hành động dễ hiểu. Nhân vật phải có mục tiêu và phản ứng cụ thể. Viết thoại ngắn, sống động, có qua có lại trong suốt 60 giây. Cân đối lượng thoại với tốc độ nói tự nhiên; không nhồi thoại đến mức không thể diễn, nhưng cũng không để khoảng lặng vô nghĩa. Nếu ảnh chỉ có một nhân vật, xây dựng câu chuyện phù hợp với một nhân vật hoặc chỉ thêm nhân vật phụ khi thật cần thiết.
+
+${lock}
+
+CLIP PROMPTS — VIẾT ĐẦY ĐỦ VÀ ĐỘC LẬP
+Trước khi xuất, hãy tự xác định: (a) mô tả nhân vật theo ảnh, (b) bối cảnh duy nhất, (c) hành động liên tục, (d) lời thoại có phân vai, (e) frame cuối của từng clip. Sau đó viết 6 prompt riêng, mỗi prompt có mô tả hình ảnh, hành động theo thời gian, thoại chính xác, âm thanh, camera và trạng thái kết clip. Chèn CHARACTER LOCK, VISUAL STYLE LOCK, LIGHT & COLOR LOCK và VOICE LOCK vào từng prompt, không chỉ ghi “như clip trước”.
+
+`;
+ clips.forEach(([title,desc],i)=>{
+  out += `\n${title}\nMỤC TIÊU: ${desc}\nTHỜI GIAN HÀNH ĐỘNG:\n- 0–2 giây: hình ảnh/hành động cụ thể, bắt nối đúng trạng thái đầu clip.\n- 2–7 giây: diễn biến chính; phân bổ lời thoại cho từng nhân vật với tên người nói rõ ràng và phản ứng nhìn/nghe tự nhiên.\n- 7–10 giây: hoàn tất hành động hoặc tạo nhịp nối; xác định chính xác tư thế, hướng nhìn, vị trí và đạo cụ ở frame cuối.\nYÊU CẦU RIÊNG: ${lock}\nLỜI THOẠI: Viết nguyên văn từng câu bằng tiếng Việt giọng miền Nam, ghi tên nhân vật trước mỗi câu. Không chỉ ghi “nói chuyện tự nhiên”.\nFRAME CUỐI / NỐI CLIP: Mô tả frame cuối cụ thể để clip kế tiếp bắt đầu đúng trạng thái.\n`;
+ });
+ out += `\nEDIT NOTES\n- Ghép đúng thứ tự clip 1 → 6, không đổi thứ tự câu chuyện.\n- Cắt tại hành động/nhịp thoại tự nhiên; tránh khoảng đen, nhảy vị trí hoặc lặp hành động.\n- Giữ ambience và mức thoại nhất quán. Nếu âm thanh giữa clip không liền, xử lý nối âm trong hậu kỳ.\n- Không tự thêm chữ, phụ đề, watermark hoặc logo nếu không được yêu cầu.\n\nFINAL SELF-CHECK\n□ Đúng 6 clip × 10 giây = 60 giây.\n□ Nhân vật, trang phục, props và phong cách không tự đổi.\n□ Ánh sáng, white balance, exposure và color grade nhất quán.\n□ Tất cả thoại là tiếng Việt giọng miền Nam tự nhiên và nhất quán.\n□ Thoại được phân vai, khẩu hình phù hợp, không có khoảng lặng vô nghĩa.\n□ Hành động cuối clip trước nối hợp lý với đầu clip sau.\n□ Câu chuyện có kết thúc rõ ràng; prompt đủ chi tiết để tạo từng clip riêng.\n\nQUAN TRỌNG: Nếu nền tảng không thể tạo đủ thoại, khóa giọng hoặc giữ frame nối clip tuyệt đối, hãy ưu tiên hành động và lời thoại cụ thể, báo rõ giới hạn; không tự tuyên bố đã bảo đảm hoàn hảo.`;
+ return out;
+}
+$("generateBtn").addEventListener("click",()=>{
+ generatedPrompt=buildPrompt();$("output").textContent=generatedPrompt;
+ $("copyBtn").disabled=false;$("downloadBtn").disabled=false;
+ $("status").textContent=imageFile?"Prompt đã tạo · "+imageFile.name:"Prompt đã tạo · chưa chọn ảnh";
+});
+$("copyBtn").addEventListener("click",async()=>{
+ if(!generatedPrompt)return;
+ try{await navigator.clipboard.writeText(generatedPrompt);showToast("Đã sao chép prompt!");}
+ catch(e){const ta=document.createElement("textarea");ta.value=generatedPrompt;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();showToast("Đã sao chép prompt!");}
+});
+$("downloadBtn").addEventListener("click",()=>{
+ if(!generatedPrompt)return;
+ const blob=new Blob([generatedPrompt],{type:"text/plain;charset=utf-8"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="muse-short-film-prompt.txt";a.click();URL.revokeObjectURL(a.href);
+});
+function showToast(s){const t=$("toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
+generatedPrompt=buildPrompt();$("output").textContent=generatedPrompt;
+$("copyBtn").disabled=false;$("downloadBtn").disabled=false;$("status").textContent="Sẵn sàng";
+</script>
+</body>
+</html>
