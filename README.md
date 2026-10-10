@@ -22,4 +22,3 @@ This app generates instructions; it does not analyze the image with an AI model 
 6. Open the published URL shown in Pages settings.
 
 Everything runs client-side. Uploaded images are only previewed in the browser and are not uploaded anywhere by this app.
-comit
